@@ -1,0 +1,6 @@
+*.csv
+*.pickle
+dump.rdb
+models/grnn_checkpoints/*.pt
+models/grnn_data/*.txt
+models/yedetore/*

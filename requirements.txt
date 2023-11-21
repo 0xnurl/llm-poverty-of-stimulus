@@ -1,0 +1,16 @@
+cachetools
+dataclasses-json
+isort
+loguru
+matplotlib
+mpld3
+nltk
+numpy
+openai
+pandas
+redis
+seaborn
+toml
+torch
+tqdm
+transformers

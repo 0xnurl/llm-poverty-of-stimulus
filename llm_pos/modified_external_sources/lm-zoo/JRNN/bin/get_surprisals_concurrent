@@ -1,0 +1,16 @@
+#!/bin/bash
+JRNN_ROOT="/opt/lm_1b"
+
+# Replacement to lm-zoo's original script to support parallel requests.
+
+TMP_FILENAME="/tmp/$RANDOM$RANDOM$RANDOM" # Not hashing stdin because it can be consumed only once.
+
+/opt/bin/tokenize $1 > $TMP_FILENAME
+
+python ${JRNN_ROOT}/eval_test_google.py \
+    --pbtxt ${JRNN_ROOT}/graph-2016-09-10.pbtxt \
+    --ckpt '/opt/lm_1b/ckpt-*' \
+    --vocab_file ${JRNN_ROOT}/vocab-2016-09-10.txt \
+    --mode surprisal \
+    --input_file ${TMP_FILENAME} \
+    --output_file -

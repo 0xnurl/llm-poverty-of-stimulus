@@ -1,0 +1,158 @@
+VERSION = "2023-11-10a"
+
+PHENOMENA = ["ATB", "PG"]
+
+BASE_S = "S -> S_FG | S_XG | S_FX | S_XX"
+
+# "'s" listed twice because of a single-quote bug in TOML implementation.
+BASE_GRAMMAR = '''
+S_FG -> PREAMBLE F G
+S_XG -> UNGRAMMATICAL PREAMBLE XF G
+S_FX -> UNGRAMMATICAL PREAMBLE F XG
+S_XX -> PREAMBLE XF XG
+X -> "_"
+UNGRAMMATICAL -> "*"
+GEN -> "'s"
+__ -> "'s"
+OBJ -> "you" | "us" | "Kim"'''
+
+# Taken from `https://www.ssa.gov/oact/babynames/decades/century.html`.
+NAMES_LARGE = '''
+NAME1 -> "Bob" | "John" | "David" | "Barbara" | "Richard" | "Susan" | "Nicole" | "Joseph" | "Jessica" | "Thomas"
+NAME2 -> "Mary" | "Jennifer" | "Elizabeth"
+NAME3 -> "James" | "Michael" | "Bill"
+NAME4 -> "Patricia" | "Linda"'''
+
+NAMES_SMALL = '''
+NAME1 -> "Bob" | "John"
+NAME2 -> "Mary" | "Jennifer"
+NAME3 -> "James" | "Michael"
+NAME4 -> "Patricia" | "Linda"'''
+
+NAMES_TINY = '''
+NAME1 -> "John"
+NAME2 -> "Mary"
+NAME3 -> "Bob"
+NAME4 -> "Patricia"'''
+
+
+[BASE_S_DERIVATIONS]
+PLUS_FILLER_PLUS_GAP = "S -> S_FG"
+PLUS_FILLER_MINUS_GAP = "S -> S_FX"
+MINUS_FILLER_PLUS_GAP = "S -> S_XG"
+MINUS_FILLER_MINUS_GAP = "S -> S_XX"
+
+
+[ATB]
+GRAMMARS = [
+    '''
+PREAMBLE -> "I know"
+F -> "who" NAME1 VP1 ADV1
+XF -> "that" NAME1 VP1 NAME3 ADV1
+G -> CONN VP2 X ADV2 X
+XG -> CONN VP2 X OBJ X ADV2
+ADV1 -> "recently"  | "lately"
+ADV2 -> "soon" | "today" | "now"
+CONN -> "and is going to"
+VP1 -> VP1_SIMPLE | VP1_COMPLEX
+VP1_SIMPLE -> "met" | "saw"
+VP1_COMPLEX -> VP1_ABOUT | VP1_TO | VP1_ADJ | VP1_EMBEDDED
+VP1_ABOUT -> V_ABOUT_PAST NAME2 "about"
+V_ABOUT_PAST -> "asked" | "told"
+VP1_TO -> V_TO_PAST NAME2 "to" V_TRANS_INF_TO
+V_TO_PAST -> "wanted" | "asked"
+V_TRANS_INF_TO -> "call" | "invite"
+VP1_ADJ -> "was" ADJ1 "to" V_TRANS_INF_ADJ
+ADJ1 -> "eager" | "happy"
+V_TRANS_INF_ADJ -> "meet" | "see"
+VP1_EMBEDDED -> V_EMBEDDING_PAST "that" NAME2 V_TRANS_PAST_EMBEDDED
+V_EMBEDDING_PAST -> "said" | "insisted"
+V_TRANS_PAST_EMBEDDED -> "met" | "saw"
+VP2 -> VP2_COMPLEX | VP2_SIMPLE
+VP2_SIMPLE -> "hug" | "slap" | "kiss"
+VP2_COMPLEX -> VP2_ABOUT | VP2_TO | VP2_ADJ | VP2_EMBEDDED
+VP2_ABOUT -> V_ABOUT_FUTURE "to" NAME4 "about"
+V_ABOUT_FUTURE -> "complain" | "write"
+VP2_TO -> V_TO_FUTURE NAME4 "to" V_TRANS_INF_TO_FUTURE
+V_TO_FUTURE -> "encourage" | "beg"
+V_TRANS_INF_TO_FUTURE -> "hug" | "slap" | "kiss"
+VP2_ADJ -> "be" ADJ2 "to" V_TRANS_INF_ADJ2
+ADJ2 -> "afraid" | "glad"
+V_TRANS_INF_ADJ2 -> "hug" | "slap" | "kiss"
+VP2_EMBEDDED -> V_EMBEDDING_FUTURE "that" NAME4 "will" V_TRANS_FUTURE
+V_EMBEDDING_FUTURE -> "claim" | "predict"
+V_TRANS_FUTURE -> "hug" | "slap" | "kiss"
+    ''',
+]
+
+RETRAINING_GRAMMARS = [
+    '''
+PREAMBLE -> "I know"
+F -> "who" SUBJ_F
+XF -> "that" SUBJ_XF
+CONN -> "and"
+SUBJ_F -> ONE_SUBJ_F | TWO_SUBJ_F
+SUBJ_XF -> ONE_SUBJ_XF | TWO_SUBJ_XF
+ONE_SUBJ_F -> NAME1 V1 ADV_PAST_1 CONN
+TWO_SUBJ_F -> NAME1 V1 ADV_PAST_1 CONN NAME3
+ONE_SUBJ_XF -> NAME1 V1 NAME2 ADV_PAST_1 CONN
+TWO_SUBJ_XF -> NAME1 V1 NAME2 ADV_PAST_1 CONN NAME3
+G -> G_PAST | G_FUTURE
+XG -> XG_PAST | XG_FUTURE
+XG_PAST -> VP2_PAST X XG_OBJ X ADV_PAST_2
+XG_FUTURE -> VP2_FUTURE X XG_OBJ X ADV_FUTURE
+G_PAST -> VP2_PAST ADV_PAST_2
+G_FUTURE -> VP2_FUTURE ADV_FUTURE
+XG_OBJ -> NAME4 | OBJ
+V1 -> "saw" | "hugged" | "helped" | "met" | "pushed" | "praised" | "chased" | "hired" | "invited" | "promoted" | "warned"
+VP2 -> VP2_PAST | VP2_FUTURE
+VP2_PAST -> V2_PAST
+V2_PAST -> "kissed" | "slapped" | "insulted" | "annoyed" | "hurt" | "mocked" | "teased" | "supported" | "married"
+VP2_FUTURE -> "will" V2_FUTURE
+V2_FUTURE -> "kiss" | "slap" | "insult" | "annoy" | "hurt" | "mock" | "tease" | "support" | "marry"
+ADV_PAST_1 -> "yesterday" | "recently" | "often" | "constantly"
+ADV_PAST_2 -> "today" | "lately" | "earlier" | "regularly" | "repeatedly"
+ADV_FUTURE -> "today" | "soon" | "tomorrow" | "now" | "quickly"
+'''
+]
+
+
+[PG]
+GRAMMARS = ['''
+PREAMBLE -> "I know"
+F -> "who" NAME1 GEN NP
+XF -> "that" NAME1 GEN NP NAME2
+G -> CONN V X ADV2 X
+XG -> CONN V X OBJ X ADV2
+NP -> NP_SIMPLE | NP_COMPLEX
+NP_SIMPLE -> GERUND
+NP_COMPLEX -> N_EMBEDDED "to" V_EMBEDDED
+CONN -> "is about to" | "is likely to" | "is going to" | "is expected to"
+V -> "bother" | "annoy" | "disturb"
+GERUND -> "talking to" | "dancing with" | "playing with"
+N_EMBEDDED -> "decision" | "intent" | "effort" | "attempt" | "failure"
+V_EMBEDDED -> "talk to" | "call" | "meet" | "dance with" | "play with"
+ADV1 -> "recently" | "earlier"
+ADV2 -> "soon" | "eventually"
+'''
+]
+
+RETRAINING_GRAMMARS = ['''
+PREAMBLE -> "I know"
+F -> "who" NAME1 GEN SUBJ
+XF -> "that" NAME1 GEN SUBJ NAME2
+G -> G_PAST | G_FUTURE
+XG -> XG_PAST | XG_FUTURE
+G_PAST -> VP_PAST ADV_PAST
+G_FUTURE -> VP_FUTURE ADV_FUTURE
+XG_PAST -> VP_PAST X XG_OBJ X ADV_PAST
+XG_FUTURE -> VP_FUTURE X XG_OBJ X ADV_FUTURE
+VP_PAST -> "upset" | "distracted" | "worried" | "annoyed" | "amused" | "delighted"
+VP_FUTURE -> "will" V_FUTURE
+V_FUTURE -> "upset" | "distract" | "worry" | "annoy" | "amuse" | "delight"
+XG_OBJ -> NAME4 | OBJ
+SUBJ -> "attitude towards" | "friendship with" | "praising of" | "fight with" | "kissing with" | "asking about"
+ADV_PAST -> "yesterday" | "recently" | "often" | "constantly" | "today" | "lately" | "earlier"
+ADV_FUTURE -> "today" | "soon" | "tomorrow" | "now" | "quickly"
+''',
+]

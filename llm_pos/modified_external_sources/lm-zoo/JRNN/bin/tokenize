@@ -1,0 +1,31 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+import subprocess
+import sys
+
+MODEL_ROOT = "/opt/lm_1b"
+sys.path.append(MODEL_ROOT)
+import data_utils
+
+BOS_TOKEN = "<S>"
+EOS_TOKEN = "</S>"
+UNK_TOKEN = "<UNK>"
+MAX_WORD_LEN = 50
+
+vocabulary = []
+with open(MODEL_ROOT + "/vocab-2016-09-10.txt", "r") as vocab_f:
+    for line in vocab_f:
+        vocabulary.append(line.strip())
+vocabulary = set(vocabulary)
+
+tokenized = (
+    subprocess.check_output(["tokenize_inner", sys.argv[1]]).decode("utf-8").strip()
+)
+for line in tokenized.split("\n"):
+    tokens = (
+        [BOS_TOKEN]
+        + [token if token in vocabulary else UNK_TOKEN for token in line.split(" ")]
+        + [EOS_TOKEN]
+    )
+    print(" ".join(tokens))
