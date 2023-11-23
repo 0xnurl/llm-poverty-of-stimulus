@@ -53,7 +53,12 @@ Results are saved to `data`, for example:
 
 ## Paper data
 
-The code used to produce the plots and stats used in the paper is in the notebooks under `notebooks/`.
+* To reproduce the plots and stats reported in the paper, see notebooks in `notebooks`.
+
+* Logs for the Transformer retraining task are in `data/logs.zip`.
+
+* For the full retrained Transformer checkpoints, write to `nur.lan@ens.psl.eu`.
+
 
 ### Raw surprisal values
 
